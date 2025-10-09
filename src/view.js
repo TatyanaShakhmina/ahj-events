@@ -1,5 +1,6 @@
 import goblinImage from "./images/goblin.png";
 
+const gridSize = 16;
 
 export default class View {
     constructor(container) {
@@ -13,11 +14,11 @@ export default class View {
         this.container.innerHTML = '';
 
         // Отрисовка поля
-        for (let i = 0; i < 16; i++) {
+        for (let i = 0; i < gridSize; i++) {
             const cell = document.createElement('div');
             cell.classList.add('cell');
             cell.dataset.index = i;
-            this.container.appendChild(cell);
+            this.container.append(cell);
             this.cells.push(cell);
         }
 
@@ -34,20 +35,39 @@ export default class View {
         score.classList.add('score');
         score.id = 'score';
         score.textContent = 'Score: 0';
-        this.container.appendChild(score);
+        this.container.append(score);
 
         // Отрисовка пропусков
         const miss = document.createElement('div');
         miss.classList.add('miss');
         miss.id = 'miss';
         miss.textContent = 'Misses: 0';
-        this.container.appendChild(miss);
+        this.container.append(miss);
+
+        // Создаём модальное окно
+        this.createModal();
+    }
+
+    // Создаем модальное окно
+    createModal() {
+        const modal = document.createElement('div');
+        modal.classList.add('modal');
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>Игра окончена!</h2>
+                <p class="modal-score"></p>
+                <button class="modal-button">Начать заново</button>
+            </div>
+        `;
+        document.body.append(modal);
+        this.modal = modal;
     }
 
     // Создаем гоблина
     createGoblin() {
         const img = document.createElement('img');
         img.src = goblinImage;
+        img.alt = 'Goblin';
         img.classList.add('goblin');
         return img;
     }
@@ -65,14 +85,14 @@ export default class View {
             index = Math.floor(Math.random() * this.cells.length);
         } while (index === prevIndex);
 
-        this.cells[index].appendChild(this.goblin);
+        this.cells[index].append(this.goblin);
         return index;
     }
 
     // Удаляем гоблина
     removeGoblin() {
         if (this.goblin.parentElement) {
-            this.goblin.parentElement.removeChild(this.goblin);
+            this.goblin.remove();
         }
     }
 
@@ -87,8 +107,18 @@ export default class View {
     }
 
     // Окончание игры
-    showGameOver(score) {
-        alert(`Игра окончена. Ваш счёт: ${score}`);
+    showGameOver(score, onRestart) {
+        const modalScore = this.modal.querySelector('.modal-score');
+        const modalButton = this.modal.querySelector('.modal-button');
+
+        modalScore.textContent = `Ваш счёт: ${score}`;
+        this.modal.classList.add('modal-visible');
+
+        // Обработчик кнопки перезапуска
+        modalButton.onclick = () => {
+            this.modal.classList.remove('modal-visible');
+            if (onRestart) onRestart();
+        };
     }
 
     // Сохраняем переданную функцию из Game в поле onClick

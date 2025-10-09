@@ -1,3 +1,5 @@
+const maxMisses = 5;
+
 export default class Game {
     constructor(view) {
         this.view = view;
@@ -14,7 +16,22 @@ export default class Game {
 
     stop() {
         clearInterval(this.timer);
-        this.view.showGameOver(this.score);
+        this.view.showGameOver(this.score, () => this.restart());
+    }
+
+    restart() {
+        // Сбрасываем состояние игры
+        this.activeIndex = null;
+        this.score = 0;
+        this.misses = 0;
+
+        // Обновляем отображение
+        this.view.updateScore(this.score);
+        this.view.updateMisses(this.misses);
+        this.view.removeGoblin();
+
+        // Запускаем игру заново
+        this.start();
     }
 
     nextGoblin() {
@@ -25,7 +42,7 @@ export default class Game {
         }
 
         // Проверяем условие проигрыша
-        if (this.misses >= 5) {
+        if (this.misses >= maxMisses) {
             this.stop();
             return;
         }
@@ -38,8 +55,8 @@ export default class Game {
         if (index === this.activeIndex) {
             this.score++;
             this.view.updateScore(this.score);
-            this.view.removeGoblin();
-            this.activeIndex = null;
+            const newIndex = this.view.moveGoblin(this.activeIndex);
+            this.activeIndex = newIndex;
         }
     }
 }
