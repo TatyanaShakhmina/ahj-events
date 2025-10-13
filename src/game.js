@@ -47,16 +47,16 @@ export default class Game {
             return;
         }
 
-        const newIndex = this.view.moveGoblin(this.activeIndex);
-        this.activeIndex = newIndex;
+        this.activeIndex =  this.view.moveGoblin(this.activeIndex);
     }
 
     hit(index) {
         if (index === this.activeIndex) {
             this.score++;
             this.view.updateScore(this.score);
-            const newIndex = this.view.moveGoblin(this.activeIndex);
-            this.activeIndex = newIndex;
+            this.activeIndex = this.view.moveGoblin(this.activeIndex);
+            clearInterval(this.timer);
+            this.timer = setInterval(() => this.nextGoblin(), 1000);
         }
     }
 }
